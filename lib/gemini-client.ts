@@ -91,7 +91,7 @@ Response:
 
       const toolCall = this.extractToolCall(responseText);
 
-      // ✅ ES2015+ SAFE — no dotAll flag
+      // ✅ ES2015+ SAFE REGEX (NO dotAll flag)
       let cleanResponse = responseText;
       if (toolCall) {
         cleanResponse = responseText
@@ -130,7 +130,7 @@ Response:
 
   private extractToolCall(response: string): ToolCall | undefined {
     try {
-      const match = response.match(/\{[\s\S]*\}/);
+      const match = response.match(/\{[\s\S]*?\}/);
       if (!match) return undefined;
 
       const parsed = JSON.parse(match[0]);
