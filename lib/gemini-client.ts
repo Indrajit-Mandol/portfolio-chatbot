@@ -17,25 +17,22 @@ export class GeminiChatbot {
     this.model = this.genAI.getGenerativeModel({
       model: 'gemini-3-flash-preview',
       systemInstruction: `You are a co-browsing assistant for Swoyam Siddharth's portfolio website.
-      
-Your primary role is to help users explore the portfolio by:
-1. Answering questions about Swoyam's experience, skills, projects, and education
-2. Performing actions on the website like scrolling, highlighting, and clicking
-3. Extracting and summarizing content from different sections
 
-Key facts about Swoyam:
-- AI Engineer at Sarvam AI (working on India's sovereign LLM)
-- Former AI Intern at Oracle NetSuite, FixIt, and Sarvam AI
-- Computer Science graduate from IIIT Bhubaneswar
-- Skills: Agentic AI (90%), Python (90%), FastAPI (85%), React/Next.js (85%)
+Your role:
+- Answer questions about experience, skills, projects, education
+- Navigate, scroll, highlight, and interact with the page
+- Extract and summarize content
 
-When users ask about specific sections, use the available tools to navigate and highlight.
-Be conversational and helpful.
+Key facts:
+- AI Engineer at Sarvam AI
+- Former intern at Oracle NetSuite, FixIt, Sarvam AI
+- IIIT Bhubaneswar graduate
+- Skills: Agentic AI, Python, FastAPI, React/Next.js
 
 Available sections:
 about, experience, skills, testimonials, contact
 
-Use tools when appropriate, but never mention the tool system.`
+Use tools when needed. Never mention the tool system.`
     });
 
     this.isInitialized = true;
@@ -77,14 +74,13 @@ User Query: "${userQuery}"
 Available Tools:
 ${toolsDescription}
 
-Chat History (last 5 messages):
+Chat History:
 ${this.getRecentHistory(5)}
 
 Instructions:
-1. Generate a tool call if navigation or interaction is required
-2. Answer directly if information is already available
-3. Be conversational and concise
-4. Tool response format: {"name": "...", "parameters": {...}}
+- Generate a tool call when interaction is required
+- Otherwise respond conversationally
+- Tool JSON format: {"name":"...","parameters":{...}}
 
 Response:
 `;
@@ -95,9 +91,8 @@ Response:
 
       const toolCall = this.extractToolCall(responseText);
 
+      // ✅ ES2015+ SAFE — no dotAll flag
       let cleanResponse = responseText;
-
-      // ✅ FIXED: ES2018-safe regex (NO /s FLAG)
       if (toolCall) {
         cleanResponse = responseText
           .replace(/\{[\s\S]*?\}/, '')
@@ -125,10 +120,9 @@ Response:
         actions: toolCall ? [toolCall.name] : undefined
       };
     } catch (error) {
-      console.error('Gemini processing error:', error);
+      console.error('Gemini error:', error);
       return {
-        response:
-          'I ran into an issue while processing your request. Please try again.',
+        response: 'Something went wrong. Please try again.',
         toolCall: undefined
       };
     }
@@ -136,19 +130,16 @@ Response:
 
   private extractToolCall(response: string): ToolCall | undefined {
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) return undefined;
+      const match = response.match(/\{[\s\S]*\}/);
+      if (!match) return undefined;
 
-      const parsed = JSON.parse(jsonMatch[0]);
-
+      const parsed = JSON.parse(match[0]);
       if (!parsed?.name || !parsed?.parameters) return undefined;
 
       const availableTools = BrowserTools.getAvailableTools();
-      const toolExists = availableTools.some(
-        tool => tool.name === parsed.name
-      );
+      const valid = availableTools.some(t => t.name === parsed.name);
 
-      return toolExists ? (parsed as ToolCall) : undefined;
+      return valid ? (parsed as ToolCall) : undefined;
     } catch {
       return undefined;
     }
