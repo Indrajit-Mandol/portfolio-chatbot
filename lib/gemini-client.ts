@@ -19,7 +19,7 @@ export class GeminiChatbot {
       systemInstruction: `
 You are a co-browsing assistant for Swoyam Siddharth's portfolio website.
 
-Your role:
+Responsibilities:
 - Answer questions about experience, skills, projects, and education
 - Navigate, scroll, highlight, and interact with the page
 - Extract and summarize content
@@ -27,8 +27,8 @@ Your role:
 Available sections:
 about, experience, skills, testimonials, contact
 
-Use tools when required. Never mention the tool system.
-      `.trim()
+Use tools when required. Never mention internal tool systems.
+`
     });
 
     this.isInitialized = true;
@@ -51,7 +51,8 @@ Use tools when required. Never mention the tool system.
     const currentPageContext =
       pageContext || BrowserTools.getPageSummary().data || '';
 
-    const toolsDescription = BrowserTools.getAvailableTools()
+    const availableTools = BrowserTools.getAvailableTools();
+    const toolsDescription = availableTools
       .map(
         tool =>
           `${tool.name}: ${tool.description} (params: ${JSON.stringify(
@@ -74,12 +75,12 @@ Chat History:
 ${this.getRecentHistory(5)}
 
 Instructions:
-- Use tools only when interaction is required
-- Otherwise answer conversationally
-- Tool JSON format: {"name":"...","parameters":{...}}
+- Generate a tool call only when interaction is needed
+- Otherwise respond normally
+- Tool JSON format: {"name":"tool","parameters":{}}
 
 Response:
-`.trim();
+`;
 
     try {
       const result = await this.model.generateContent(prompt);
@@ -87,8 +88,9 @@ Response:
 
       const toolCall = this.extractToolCall(responseText);
 
-      // ✅ ABSOLUTELY SAFE REGEX (NO /s FLAG)
       let cleanResponse = responseText;
+
+      // ✅ SAFE REGEX — NO dotAll flag
       if (toolCall) {
         cleanResponse = responseText
           .replace(/\{[\s\S]*?\}/, '')
@@ -118,7 +120,7 @@ Response:
     } catch (error) {
       console.error('Gemini error:', error);
       return {
-        response: 'Something went wrong. Please try again.',
+        response: 'An error occurred. Please try again.',
         toolCall: undefined
       };
     }
@@ -132,11 +134,10 @@ Response:
       const parsed = JSON.parse(match[0]);
       if (!parsed?.name || !parsed?.parameters) return undefined;
 
-      const exists = BrowserTools.getAvailableTools().some(
-        tool => tool.name === parsed.name
-      );
+      const availableTools = BrowserTools.getAvailableTools();
+      const isValid = availableTools.some(t => t.name === parsed.name);
 
-      return exists ? (parsed as ToolCall) : undefined;
+      return isValid ? (parsed as ToolCall) : undefined;
     } catch {
       return undefined;
     }
