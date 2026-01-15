@@ -16,17 +16,19 @@ export class GeminiChatbot {
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
       model: 'gemini-3-flash-preview',
-      systemInstruction: `You are a co-browsing assistant for Swoyam Siddharth's portfolio website.
+      systemInstruction: `
+You are a co-browsing assistant for Swoyam Siddharth's portfolio website.
 
 Your role:
-- Answer questions about experience, skills, projects, education
+- Answer questions about experience, skills, projects, and education
 - Navigate, scroll, highlight, and interact with the page
 - Extract and summarize content
 
 Available sections:
 about, experience, skills, testimonials, contact
 
-Use tools when required. Never mention the tool system.`
+Use tools when required. Never mention the tool system.
+      `.trim()
     });
 
     this.isInitialized = true;
@@ -62,7 +64,8 @@ Use tools when required. Never mention the tool system.`
 Current Page Context:
 ${currentPageContext}
 
-User Query: "${userQuery}"
+User Query:
+"${userQuery}"
 
 Available Tools:
 ${toolsDescription}
@@ -71,12 +74,12 @@ Chat History:
 ${this.getRecentHistory(5)}
 
 Instructions:
-- Generate a tool call only if interaction is required
+- Use tools only when interaction is required
 - Otherwise answer conversationally
 - Tool JSON format: {"name":"...","parameters":{...}}
 
 Response:
-`;
+`.trim();
 
     try {
       const result = await this.model.generateContent(prompt);
@@ -84,7 +87,7 @@ Response:
 
       const toolCall = this.extractToolCall(responseText);
 
-      // ✅ ES2015+ SAFE (NO dotAll /s FLAG)
+      // ✅ ABSOLUTELY SAFE REGEX (NO /s FLAG)
       let cleanResponse = responseText;
       if (toolCall) {
         cleanResponse = responseText
@@ -129,11 +132,11 @@ Response:
       const parsed = JSON.parse(match[0]);
       if (!parsed?.name || !parsed?.parameters) return undefined;
 
-      const valid = BrowserTools.getAvailableTools().some(
+      const exists = BrowserTools.getAvailableTools().some(
         tool => tool.name === parsed.name
       );
 
-      return valid ? (parsed as ToolCall) : undefined;
+      return exists ? (parsed as ToolCall) : undefined;
     } catch {
       return undefined;
     }
