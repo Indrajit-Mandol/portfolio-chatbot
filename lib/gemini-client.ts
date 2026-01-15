@@ -23,16 +23,10 @@ Your role:
 - Navigate, scroll, highlight, and interact with the page
 - Extract and summarize content
 
-Key facts:
-- AI Engineer at Sarvam AI
-- Former intern at Oracle NetSuite, FixIt, Sarvam AI
-- IIIT Bhubaneswar graduate
-- Skills: Agentic AI, Python, FastAPI, React/Next.js
-
 Available sections:
 about, experience, skills, testimonials, contact
 
-Use tools when needed. Never mention the tool system.`
+Use tools when required. Never mention the tool system.`
     });
 
     this.isInitialized = true;
@@ -55,8 +49,7 @@ Use tools when needed. Never mention the tool system.`
     const currentPageContext =
       pageContext || BrowserTools.getPageSummary().data || '';
 
-    const availableTools = BrowserTools.getAvailableTools();
-    const toolsDescription = availableTools
+    const toolsDescription = BrowserTools.getAvailableTools()
       .map(
         tool =>
           `${tool.name}: ${tool.description} (params: ${JSON.stringify(
@@ -78,8 +71,8 @@ Chat History:
 ${this.getRecentHistory(5)}
 
 Instructions:
-- Generate a tool call when interaction is required
-- Otherwise respond conversationally
+- Generate a tool call only if interaction is required
+- Otherwise answer conversationally
 - Tool JSON format: {"name":"...","parameters":{...}}
 
 Response:
@@ -91,7 +84,7 @@ Response:
 
       const toolCall = this.extractToolCall(responseText);
 
-      // ✅ ES2015+ SAFE REGEX (NO dotAll flag)
+      // ✅ ES2015+ SAFE (NO dotAll /s FLAG)
       let cleanResponse = responseText;
       if (toolCall) {
         cleanResponse = responseText
@@ -130,14 +123,15 @@ Response:
 
   private extractToolCall(response: string): ToolCall | undefined {
     try {
-      const match = response.match(/\{[\s\S]*?\}/);
+      const match = response.match(/\{[\s\S]*\}/);
       if (!match) return undefined;
 
       const parsed = JSON.parse(match[0]);
       if (!parsed?.name || !parsed?.parameters) return undefined;
 
-      const availableTools = BrowserTools.getAvailableTools();
-      const valid = availableTools.some(t => t.name === parsed.name);
+      const valid = BrowserTools.getAvailableTools().some(
+        tool => tool.name === parsed.name
+      );
 
       return valid ? (parsed as ToolCall) : undefined;
     } catch {
