@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤖 AI-Powered Co-Browsing Chatbot for Portfolio Website
 
-## Getting Started
+An AI-powered conversational chatbot that acts as a **co-browsing assistant** for a portfolio website.  
+It dynamically understands website content and helps users explore it using natural language by performing actions such as **scrolling, navigation, highlighting, clicking, and form filling**.
 
-First, run the development server:
+---
 
+## ✨ Features
+
+- **Dynamic Content Understanding**
+  - Extracts visible website content in real time
+- **Conversational AI**
+  - Powered by Google Gemini API
+- **Co-Browsing Actions**
+  - Scroll to specific sections
+  - Highlight page elements
+  - Click buttons and links
+  - Fill form inputs
+  - Navigate between sections
+- **Tool-Based Architecture**
+  - AI decides actions and executes browser tools
+- **Real-Time Interaction**
+  - Immediate visual feedback on the webpage
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
+- **AI / ML:** Google Gemini API
+- **Utilities:** DOM manipulation, real-time content extraction
+
+---
+
+## 📦 Installation & Setup
+
+### 1️⃣ Clone the Repository
 ```bash
+git clone https://github.com/Indrajit-Mandol/portfolio-chatbot.git
+cd portfolio-chatbot
+2️⃣ Install Dependencies
+bash
+Copy code
+npm install
+3️⃣ Environment Variables
+Create a .env.local file in the root directory:
+
+env
+Copy code
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+4️⃣ Get a Gemini API Key
+Visit Google AI Studio
+
+Create a new API key
+
+Copy the key into .env.local
+
+5️⃣ Run the Development Server
+bash
+Copy code
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Open your browser and visit:
+👉 http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🏗️ Project Structure
+text
+Copy code
+portfolio-chatbot/
+├── app/
+│   ├── components/
+│   │   ├── ChatInterface.tsx
+│   │   ├── Header.tsx
+│   │   ├── Hero.tsx
+│   │   ├── About.tsx
+│   │   ├── Experience.tsx
+│   │   ├── Skills.tsx
+│   │   ├── Testimonials.tsx
+│   │   └── Contact.tsx
+│   ├── layout.tsx
+│   └── page.tsx
+├── lib/
+│   ├── content-extractor.ts
+│   ├── tools.ts
+│   ├── gemini-client.ts
+│   └── types.ts
+└── public/
+🎯 Usage Examples
+Command	Action
+"Go to skills section"	Scrolls to skills
+"Highlight experience"	Highlights experience section
+"What projects are shown?"	Summarizes page content
+"Go to contact form"	Navigates to contact section
+"Fill contact name with John"	Fills form input
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🧠 Architecture Overview
+ContentExtractor
+Extracts visible DOM text
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Identifies sections and positions
 
-## Learn More
+Generates CSS selectors
 
-To learn more about Next.js, take a look at the following resources:
+BrowserTools
+Executes scrolling, clicking, highlighting
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Handles form filling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Exposes tools for AI to call
 
-## Deploy on Vercel
+Gemini Client
+Communicates with Gemini API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Maintains chat context
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Generates structured tool calls
+
+Chat Interface
+Main UI for conversation
+
+Executes AI-driven browser actions
+
+Example Tool Call
+json
+Copy code
+{
+  "name": "scroll_to_section",
+  "parameters": {
+    "sectionId": "experience"
+  }
+}
